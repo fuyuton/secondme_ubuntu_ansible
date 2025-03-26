@@ -1,0 +1,23 @@
+--- setup.sh.bak        2025-03-26 19:49:24.858391337 +0900
++++ setup.sh    2025-03-26 19:59:43.708406827 +0900
+@@ -661,20 +661,6 @@
+         return 1
+     fi
+
+-    # Check if running on macOS
+-    if [[ "$(uname)" != "Darwin" ]]; then
+-        log_error "This script only supports macOS"
+-        return 1
+-    fi
+-
+-    local macos_version=$(sw_vers -productVersion)
+-    log_info "Detected macOS version: $macos_version"
+-
+-    local major_version=$(echo "$macos_version" | cut -d. -f1)
+-    if [[ "$major_version" -lt 14 ]]; then
+-        log_error "This script requires macOS 14 (Sonoma) or later. Your version: $macos_version"
+-        return 1
+-    fi
+
+     # Check shell config file
+     local config_file="$HOME/.zshrc"
