@@ -1,8 +1,8 @@
 --- setup.sh.orig        2025-03-26 19:49:24.858391337 +0900
 +++ setup.sh    2025-03-26 19:59:43.708406827 +0900
 @@ -661,20 +661,6 @@
-         return 1
-     fi
+        return 1
+    fi
 
 -    # Check if running on macOS
 -    if [[ "$(uname)" != "Darwin" ]]; then
@@ -19,5 +19,5 @@
 -        return 1
 -    fi
 
-     # Check shell config file
-     local config_file="$HOME/.zshrc"
+    # Check shell config file
+    local config_file="$HOME/.zshrc"
