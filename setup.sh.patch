@@ -1,8 +1,8 @@
---- setup.sh.orig        2025-03-26 19:49:24.858391337 +0900
-+++ setup.sh    2025-03-26 19:59:43.708406827 +0900
-@@ -661,20 +661,6 @@
-        return 1
-    fi
+--- setup.sh.orig       2025-04-01 21:24:25.261360339 +0900
++++ setup.sh    2025-04-01 21:26:37.903585940 +0900
+@@ -661,21 +661,6 @@
+         return 1
+     fi
 
 -    # Check if running on macOS
 -    if [[ "$(uname)" != "Darwin" ]]; then
@@ -18,6 +18,7 @@
 -        log_error "This script requires macOS 14 (Sonoma) or later. Your version: $macos_version"
 -        return 1
 -    fi
-
-    # Check shell config file
-    local config_file="$HOME/.zshrc"
+-
+     # Check shell config file
+     local config_file="$HOME/.zshrc"
+     if ! ensure_shell_config "$config_file"; then
