@@ -31,7 +31,6 @@ cat > local-second-me-playbook.yml << 'EOF'
   become: yes
   vars:
     app_dir: /opt/second-me
-    build_dir: "{{ app_dir }}/build"
     repo_url: https://github.com/mindverse/Second-Me.git
 
   tasks:
@@ -68,12 +67,15 @@ cat > local-second-me-playbook.yml << 'EOF'
           - wget
           - unzip
           - ffmpeg
+          - pipx
+          - python3-poetry
+          - sqlite3
         state: present
 
     - name: Python仮想環境の作成
-      command: python3.12 -m venv /home/fuyuton/secondme/python-project_env
+      command: python3.12 -m venv /home/fuyune/secondme/python-project_env
       args:
-        creates: /home/fuyuton/secondme/python-project_env/bin/activate
+        creates: /home/fuyune/secondme/python-project_env/bin/activate
 
     - name: Install Python dependencies
       pip:
@@ -83,15 +85,19 @@ cat > local-second-me-playbook.yml << 'EOF'
           - transformers
           - torch
           - scikit-learn
-        virtualenv: /home/fuyuton/secondme/python-project_env
+        virtualenv: /home/fuyune/secondme/python-project_env
         virtualenv_python: python3.12
         state: present
+
+    - name: Install Python dependencies pipx
+      community.general.pipx:
+        name: poetry
 
     - name: Create app directory
       file:
         path: "{{ app_dir }}"
         state: directory
-        mode: '0755'
+        mode: '0777'
 
     - name: Clone Second-Me repository
       git:
@@ -99,63 +105,27 @@ cat > local-second-me-playbook.yml << 'EOF'
         dest: "{{ app_dir }}"
         clone: yes
         update: yes
-
-    - name: Create build directory
-      file:
-        path: "{{ build_dir }}"
-        state: directory
-        mode: '0755'
-
-    - name: Configure project with CMake
-      command: cmake ..
-      args:
-        chdir: "{{ build_dir }}"
-        creates: "{{ build_dir }}/Makefile"
+        force: yes
 
     - name: Build project with make
-      command: make -j$(nproc)
-      args:
-        chdir: "{{ build_dir }}"
+      community.general.make:
+        chdir: "{{ app_dir }}"
+        target: setup
+        file: /opt/second-me/Makefile
 
-    - name: Create systemd service file
-      copy:
-        dest: /etc/systemd/system/second-me.service
-        content: |
-          [Unit]
-          Description=Second-Me Service
-          After=network.target
+    - name: Stop Second-me
+      community.general.make:
+        chdir: "{{ app_dir }}"
+        target: stop
+        file: /opt/second-me/Makefile
 
-          [Service]
-          Type=simple
-          User=root
-          WorkingDirectory={{ app_dir }}
-          ExecStart={{ build_dir }}/second-me
-          Restart=always
-          RestartSec=3
+    - name: Start Second-me
+      community.general.make:
+        chdir: "{{ app_dir }}"
+        target: start
+        file: /opt/second-me/Makefile
 
-          [Install]
-          WantedBy=multi-user.target
-        mode: '0644'
 
-    - name: Reload systemd
-      systemd:
-        daemon_reload: yes
-
-    - name: Enable and start Second-Me service
-      systemd:
-        name: second-me
-        enabled: yes
-        state: started
-
-    - name: Check if Second-Me is running
-      command: systemctl status second-me
-      register: service_status
-      changed_when: false
-      ignore_errors: yes
-
-    - name: Display service status
-      debug:
-        msg: "{{ service_status.stdout_lines }}"
 EOF
 
 # Ansibleのホスト設定
