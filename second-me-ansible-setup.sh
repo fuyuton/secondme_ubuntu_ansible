@@ -34,6 +34,12 @@ cat > local-second-me-playbook.yml << 'EOF'
     repo_url: https://github.com/mindverse/Second-Me.git
 
   tasks:
+    - name: Stop Second-me
+      community.general.make:
+        chdir: "{{ app_dir }}"
+        target: stop
+        file: /opt/second-me/Makefile
+
     - name: Update apt cache
       apt:
         update_cache: yes
@@ -85,6 +91,7 @@ cat > local-second-me-playbook.yml << 'EOF'
           - transformers
           - torch
           - scikit-learn
+          - graphrag
         virtualenv: /home/fuyune/secondme/python-project_env
         virtualenv_python: python3.12
         state: present
@@ -113,12 +120,6 @@ cat > local-second-me-playbook.yml << 'EOF'
         target: setup
         file: /opt/second-me/Makefile
 
-    - name: Stop Second-me
-      community.general.make:
-        chdir: "{{ app_dir }}"
-        target: stop
-        file: /opt/second-me/Makefile
-
     - name: Start Second-me
       community.general.make:
         chdir: "{{ app_dir }}"
@@ -145,3 +146,4 @@ EOF
 
 echo "セットアップが完了しました。次のコマンドを実行してSecond-Meをインストールします："
 echo "cd $DEPLOY_DIR && ansible-playbook local-second-me-playbook.yml --ask-become-pass"
+
